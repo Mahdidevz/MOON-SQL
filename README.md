@@ -75,6 +75,23 @@ Natural Language Question
 
 ---
 
+## 🚀 Installation
+
+```bash
+# 1. Clone the repository
+git clone https://github.com/Mahdidevz/MOON-SQL.git
+cd MOON-SQL
+
+# 2. Create and activate a virtual environment
+python -m venv .venv
+source .venv/bin/activate
+
+# 3. Install dependencies
+pip install -r requirements.txt
+```
+
+---
+
 ## ⚙️ Prerequisites
 
 ### Environment Variables
@@ -114,27 +131,6 @@ data/
 ```
 
 The `intermediate_datasets/` and `generate_datasets/` directories are created automatically by `script/run.sh` if they do not exist.
-
----
-
-## 🚀 Installation
-
-```bash
-# 1. Clone the repository
-git clone https://github.com/Mahdidevz/MOON-SQL.git
-cd MOON-SQL
-
-# 2. Create and activate a virtual environment
-python -m venv .venv
-source .venv/bin/activate
-
-# 3. Install dependencies
-pip install -r requirements.txt
-
-# 4. Set your API credentials
-export OPENAI_API_KEY="gsk_..."
-export OPENAI_API_BASE="https://api.groq.com/openai/v1"
-```
 
 ---
 
