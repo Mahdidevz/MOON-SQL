@@ -114,7 +114,7 @@ export OPENAI_API_BASE="https://api.groq.com/openai/v1"
 ---
 
 ## 📦 Data Layout
-
+You can get data from [BIRD](https://github.com/AlibabaResearch/DAMO-ConvAI/tree/main/bird) and [Spider](https://yale-lily.github.io/spider).
 ```
 data/
 ├── spider/
