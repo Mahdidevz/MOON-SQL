@@ -1,0 +1,12 @@
+# Environments
+.idea/
+venv/
+__pycache__/
+
+# Datasets and Outputs
+data/
+data/generate_datasets/
+data/intermediate_datasets/
+
+# API Keys and Secrets
+.env
