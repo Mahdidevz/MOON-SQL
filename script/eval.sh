@@ -4,10 +4,15 @@ set -euo pipefail
 PROJECT_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 
 db_root_path="$PROJECT_ROOT/data/spider_data/database/"
-diff_json_path="$PROJECT_ROOT/data/spider/dev_50.json"
-ground_truth_path="$PROJECT_ROOT/data/spider_data/"
 predicted_sql_path="$PROJECT_ROOT/data/intermediate_datasets/"
-data_mode="dev_50"
+
+# ── Dynamic path overrides ─────────────────────────────────────────────────
+# Set externally (e.g. by test_pipeline.sh) to switch between datasets.
+# Defaults preserve the original behaviour.
+data_mode="${DATA_MODE:-dev_50}"
+diff_json_path="${DEV_PATH:-$PROJECT_ROOT/data/spider/dev_50.json}"
+ground_truth_path="$PROJECT_ROOT/data/spider_data/"
+# ──────────────────────────────────────────────────────────────────────────
 num_cpus=4
 meta_time_out=30.0
 mode_gt="gt"

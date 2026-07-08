@@ -130,7 +130,24 @@ def sort_results(list_of_dicts):
     return sorted(list_of_dicts, key=lambda x: x["sql_idx"])
 
 
-def compute_ves(exec_results):
+def _safe_div(numerator: float, denominator: int, label: str = "") -> float:
+    """Return numerator/denominator, or 0.0 when denominator is zero.
+
+    A zero denominator means the current dataset slice contains no queries
+    for that difficulty bucket.  We warn the user rather than crashing so
+    that small subsets used for debugging still produce a valid report.
+    """
+    if denominator == 0:
+        if label:
+            print(
+                f'[WARNING] No "{label}" samples in this subset — '
+                f"reporting 0.00 VES for that difficulty level."
+            )
+        return 0.0
+    return numerator / denominator
+
+
+def compute_ves(exec_results, label: str = "") -> float:
     num_queries = len(exec_results)
     total_ratio = 0
     count = 0
@@ -139,8 +156,7 @@ def compute_ves(exec_results):
         if result["time_ratio"] != 0:
             count += 1
         total_ratio += math.sqrt(result["time_ratio"]) * 100
-    ves = total_ratio / num_queries
-    return ves
+    return _safe_div(total_ratio, num_queries, label)
 
 
 def load_json(dir):
@@ -233,17 +249,19 @@ def compute_ves_by_diff(exec_results, diff_json_path):
     num_queries = len(exec_results)
     contents = load_json(diff_json_path)
     simple_results, moderate_results, challenging_results = [], [], []
-    for i, content in enumerate(contents):
+    # zip stops at the shorter list, so a subset exec_results never
+    # causes an IndexError when contents comes from the full dev.json.
+    for result, content in zip(exec_results, contents):
         difficulty = infer_difficulty(content)
         if difficulty == "simple":
-            simple_results.append(exec_results[i])
+            simple_results.append(result)
         if difficulty == "moderate":
-            moderate_results.append(exec_results[i])
+            moderate_results.append(result)
         if difficulty == "challenging":
-            challenging_results.append(exec_results[i])
-    simple_ves = compute_ves(simple_results)
-    moderate_ves = compute_ves(moderate_results)
-    challenging_ves = compute_ves(challenging_results)
+            challenging_results.append(result)
+    simple_ves = compute_ves(simple_results, label="simple")
+    moderate_ves = compute_ves(moderate_results, label="moderate")
+    challenging_ves = compute_ves(challenging_results, label="challenging")
     all_ves = compute_ves(exec_results)
     count_lists = [
         len(simple_results),

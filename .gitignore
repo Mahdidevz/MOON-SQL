@@ -1,12 +1,13 @@
 # Environments
 .idea/
+.venv/
 venv/
 __pycache__/
-
-# Datasets and Outputs
+*.pyc
 data/
 data/generate_datasets/
 data/intermediate_datasets/
+result.json
 
 # API Keys and Secrets
 .env

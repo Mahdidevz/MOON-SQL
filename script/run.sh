@@ -5,7 +5,6 @@ ROOT_DIR="$(cd "$(dirname "$0")/.." && pwd)"
 export PYTHONPATH="$ROOT_DIR:$ROOT_DIR/src:$PYTHONPATH"
 
 tables="$ROOT_DIR/data/spider_data/tables.json"
-dev_path="$ROOT_DIR/data/spider/dev_50.json"
 db_path="$ROOT_DIR/data/spider_data/database"
 PROCESS_NUM=1
 API_CALL_NUM=2
@@ -13,10 +12,18 @@ API_CALL_NUM=2
 short_model_name='llama-3.3-70b-versatile'
 long_model_name='llama-3.3-70b-versatile'
 
+# ── Dynamic path overrides ─────────────────────────────────────────────────
+# These variables can be set externally (e.g. by test_pipeline.sh) to switch
+# between the full dataset and a smaller subset without touching core logic.
+# Defaults preserve the original behaviour.
+dev_path="${DEV_PATH:-$ROOT_DIR/data/spider/dev_50.json}"
+data_mode="${DATA_MODE:-dev_50}"
+# ──────────────────────────────────────────────────────────────────────────
+
 first_output_path="$ROOT_DIR/data/intermediate_datasets/first_round_test.sql"
 third_output_path="$ROOT_DIR/data/intermediate_datasets/third_round.sql"
 processed_dataset_path="$ROOT_DIR/data/generate_datasets/preprocessed_data.json"
-final_output_path="$ROOT_DIR/data/intermediate_datasets/predict_dev_50.json"
+final_output_path="$ROOT_DIR/data/intermediate_datasets/predict_${data_mode}.json"
 
 RETRY_NUM=10
 

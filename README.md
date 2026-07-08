@@ -118,23 +118,57 @@ You can get data from [BIRD](https://github.com/AlibabaResearch/DAMO-ConvAI/tree
 ```
 data/
 ├── spider/
-│   └── dev_50.json              # Spider dev questions (50-sample subset)
+│   ├── dev.json                 # Full Spider dev set (1 034 questions)
+│   └── dev_subset.json          # Auto-generated subset (created by test_pipeline.sh)
 ├── spider_data/
 │   ├── tables.json              # Database schemas
+│   ├── dev_gold.sql             # Gold labels for the full dev set (auto-generated)
+│   ├── dev_subset_gold.sql      # Gold labels for the active subset (auto-generated)
 │   └── database/               # SQLite .db files, one per schema
 ├── generate_datasets/
 │   └── preprocessed_data.json  # Output of Stage 0 (auto-created)
 └── intermediate_datasets/
     ├── first_round_test.sql     # Output of Stage 1 (auto-created)
     ├── third_round.sql          # Output of Stage 2 (auto-created)
-    └── predict_dev_50.json      # Final predictions (auto-created)
+    └── predict_{data_mode}.json # Final predictions (auto-created)
 ```
 
-The `intermediate_datasets/` and `generate_datasets/` directories are created automatically by `script/run.sh` if they do not exist.
+The `intermediate_datasets/`, `generate_datasets/`, `dev_subset.json`, and `*_gold.sql` files are all created automatically — you never need to prepare them by hand.
 
 ---
 
 ## 🧑‍💻 Usage
+
+### 🔬 Dynamic Subset Testing
+
+Running the pipeline on the full 1 034-sample dev set consumes significant LLM tokens. Use the unified test wrapper to slice the dataset to any size before running, saving both time and API quota during development and debugging.
+
+```bash
+# Run on the first 50 samples (recommended for quick smoke tests)
+bash script/test_pipeline.sh 50
+
+# Run on a larger subset
+bash script/test_pipeline.sh 200
+
+# Explicit flag form (identical behaviour)
+bash script/test_pipeline.sh -n 50
+
+# Run on the complete dev.json (full evaluation)
+bash script/test_pipeline.sh --full
+bash script/test_pipeline.sh          # --full is the default
+```
+
+The wrapper does everything in one shot:
+
+| Step | What happens |
+|---|---|
+| **0 — Slice** | `src/utils/slice_data.py` extracts the first N entries from `dev.json`, writes `data/spider/dev_subset.json` and the matching `data/spider_data/dev_subset_gold.sql` |
+| **1 — Generate** | `script/run.sh` runs preprocessing → first-round generation → self-correction → post-processing on the slice |
+| **2 — Evaluate** | `script/eval.sh` scores exact-match accuracy and VES against the slice's gold labels |
+
+> **Token tip:** A 50-sample run costs roughly 5 % of a full run. Iterate on prompt changes with `-n 50`, then validate with `--full` before committing.
+
+---
 
 ### Generation
 
@@ -195,12 +229,14 @@ MOON-SQL/
 │   │   └── evaluation_ves.py    # Valid Efficiency Score
 │   ├── utils/
 │   │   ├── tools.py             # Schema/FK helpers, SQL runner
-│   │   └── append_db_id.py      # Post-process: attach db_id to predictions
+│   │   ├── append_db_id.py      # Post-process: attach db_id to predictions
+│   │   └── slice_data.py        # Dataset slicer for token-efficient testing
 │   ├── prompts.py               # All LLM prompt templates
 │   └── process_sql.py           # SQL parsing utilities
 ├── script/
 │   ├── run.sh                   # End-to-end generation pipeline
 │   ├── eval.sh                  # Evaluation runner
+│   ├── test_pipeline.sh         # Dynamic subset test wrapper (entry point)
 │   └── generate_train_data.sh   # Training data generation (optional)
 ├── data/                        # Spider dataset (see Data Layout above)
 ├── requirements.txt
