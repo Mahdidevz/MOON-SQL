@@ -1,6 +1,6 @@
 <div align="center">
 
-# MOON-SQL
+# MOON-SQL 🌕
 
 ### Schema-Enhanced & Adaptive Text-to-SQL Generation
 
